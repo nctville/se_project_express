@@ -1,4 +1,4 @@
-const router = require("express").Router(); // Import express router
+const router = require("express").Router();
 
 const ClothingItem = require("../models/clothingItem")
 
@@ -41,6 +41,26 @@ const deleteItem = (req, res)=>{
     .catch(e => res.status(500).send({ message: "Delete Item failed", e }));
 }
 
+const likeItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
+  )
+    .then(item => res.status(200).send({ data: item }))
+    .catch(e => res.status(500).send({ message: "Like Item failed", e }));
+};
+
+const dislikeItem = (req, res) => {
+  ClothingItem.findByIdAndUpdate(
+    req.params.itemId,
+    { $pull: { likes: req.user._id } },
+    { new: true }
+  )
+    .then(item => res.status(200).send({ data: item }))
+    .catch(e => res.status(500).send({ message: "Dislike Item failed", e }));
+};
+
 module.exports={
-  createItem, getItems, updateItem, deleteItem
+  createItem, getItems, updateItem, deleteItem, likeItem, dislikeItem
 }
