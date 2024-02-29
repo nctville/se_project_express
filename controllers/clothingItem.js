@@ -1,43 +1,46 @@
-const User = require("../models/user");
+const router = require("express").Router(); // Import express router
 
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).send({ message: err.message });
-    });
-};
+const ClothingItem = require("../models/clothingItem")
 
-const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
-      }
-      return res.status(500).send({ message: err.message });
-    });
-};
+const createItem = (req, res)=>{
+  console.log(req)
+  console.log(req.body)
 
-const getUserById = (req, res) => {
-  const { userId } = req.params;
-  user
-    .findById(userId)
+  const {name, weather, imageURL} = req.body;
+
+  ClothingItem.create({name, weather, imageURL}).then((item)=>{
+    console.log(item)
+    res.send({data:item}).catch((e)=>{
+      res.status(500).send({message: `Error from createItem`, e})
+    })
+  })
+}
+
+
+const getItems =(req, res)=>{
+  ClothingItem.find({}). then((items)=> res.status(200).send(items))
+  .catch((e)=>{
+    res.status(500).send({message: "Get Items failed", e})
+  })
+}
+
+const updateItem = (req, res) => {
+  const { itemId } = req.params;
+  const { imageURL } = req.body;
+  ClothingItem.findByIdAndUpdate(itemId, { $set: { imageURL } })
     .orFail()
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "User not found" });
-      }
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid user ID" });
-      }
-      return res.status(500).send({ message: err.message });
-    });
-};
+    .then(item => res.status(200).send({ data: item }))
+    .catch(e => res.status(500).send({ message: "Update Item failed", e }));
+}
 
-module.exports = { getUsers, createUser, getUserById };
+const deleteItem = (req, res)=>{
+  const { itemId } = req.params;
+  ClothingItem.findByIdAndDelete(itemId)
+    .orFail()
+    .then(item => res.status(204).send({}))
+    .catch(e => res.status(500).send({ message: "Delete Item failed", e }));
+}
+
+module.exports={
+  createItem, getItems, updateItem, deleteItem
+}
