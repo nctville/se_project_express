@@ -16,14 +16,14 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Invalid data provided' });
-      } else {
-        return res.status(DEFAULT_ERROR).send({ message: 'Create Items failed' });
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Invalid data provided" });
       }
+      return res.status(DEFAULT_ERROR).send({ message: "Create Items failed" });
     });
 };
-
 
 const getItems = (req, res) => {
   ClothingItem.find({})
