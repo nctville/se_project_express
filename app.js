@@ -16,7 +16,7 @@ mongoose.connect(
 );
 app.use((req, res, next) => {
   req.user = {
-    _id: "65e0c3d4add728a0be390fe2"
+    _id: "65e0c3d4add728a0be390fe2",
   };
   next();
 });
@@ -24,7 +24,6 @@ app.use((req, res, next) => {
 app.use(express.json());
 // app.use("/", userRouter)
 app.use(routes);
-
 
 console.log("!!!");
 
