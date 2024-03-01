@@ -2,7 +2,7 @@ const express = require("express");
 
 const app = express();
 const mongoose = require("mongoose");
-const userRouter = require("./routes/users")
+
 const routes = require("./routes");
 
 const { PORT = 3001 } = process.env;
@@ -22,7 +22,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-//app.use("/", userRouter)
+// app.use("/", userRouter)
 app.use(routes);
 
 

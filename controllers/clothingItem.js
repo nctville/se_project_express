@@ -1,4 +1,4 @@
-const router = require("express").Router();
+// const router = require("express").Router();
 
 const ClothingItem = require("../models/clothingItem")
 const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR} = require("../utils/errors")
@@ -36,14 +36,13 @@ const deleteItem = (req, res) => {
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
-      } else if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-      } else {
-        return res.status(DEFAULT_ERROR).send({ message: "Delete Item failed" });
       }
+      if (err.name === 'CastError') {
+        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: "Delete Item failed" });
     });
 };
-
 
 const likeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
@@ -56,13 +55,14 @@ const likeItem = (req, res) => {
     .catch(err => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
-      } else if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-      } else {
-        return res.status(DEFAULT_ERROR).send({ message: "Like Item failed" });
       }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: "Like Item failed" });
     });
 };
+
 const dislikeItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
@@ -74,11 +74,11 @@ const dislikeItem = (req, res) => {
     .catch(err => {
       if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
-      } else if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
-      } else {
-        return res.status(DEFAULT_ERROR).send({ message: "Dislike Item failed" });
       }
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
+      }
+      return res.status(DEFAULT_ERROR).send({ message: "Dislike Item failed" });
     });
 };
 

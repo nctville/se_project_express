@@ -30,7 +30,7 @@ const createUser = (req, res) => {
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
-  user
+  User
     .findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))

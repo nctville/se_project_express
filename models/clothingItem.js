@@ -1,4 +1,5 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const validator = require("validator"); // Import validator module
 
 const clothingItemSchema = new mongoose.Schema({
   name: {
@@ -15,10 +16,8 @@ const clothingItemSchema = new mongoose.Schema({
   imageUrl: {
     type: String,
     required: true,
-    validate: {
-      validator: function(value) {
-        return validator.isURL(value);
-      },
+    validate: { // Using method shorthand
+      validator: validator.isURL, // Using method shorthand
       message: 'You must enter a valid URL'
     }
   },
@@ -37,4 +36,4 @@ const clothingItemSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model("item", clothingItemSchema)
+module.exports = mongoose.model("item", clothingItemSchema);
