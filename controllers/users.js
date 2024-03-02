@@ -1,7 +1,13 @@
 const User = require("../models/user");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
-const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR, MONGODB_ERROR } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT_ERROR,
+  MONGODB_ERROR,
+  UNAUATHORIZED,
+} = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
@@ -33,14 +39,15 @@ const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   // Hashing the password
-  bcrypt.hash(password, 10)
-    .then(hash => {
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
       // Creating the user with hashed password
       return User.create({
         name: name,
         avatar: avatar,
         email: email,
-        password: hash
+        password: hash,
       });
     })
     .then((user) => {
@@ -50,14 +57,17 @@ const createUser = (req, res) => {
     .catch((err) => {
       // Check if the error is a duplicate email error
       if (err.code === MONGODB_ERROR) {
-        return res.status(BAD_REQUEST).send({ message: "Email already exists" });
+        return res
+          .status(BAD_REQUEST)
+          .send({ message: "Email already exists" });
       }
       // Handle other errors
       console.error(err);
-      return res.status(DEFAULT_ERROR).send({ message: "An error has occurred on the server." });
+      return res
+        .status(DEFAULT_ERROR)
+        .send({ message: "An error has occurred on the server." });
     });
 };
-
 
 const getUserById = (req, res) => {
   const { userId } = req.params;
@@ -78,4 +88,40 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUsers, createUser, getUserById };
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  // Find the user by email
+  User.findOne({ email })
+    .then((user) => {
+      if (!user) {
+        // If user is not found, return error
+        return res.status(401).json({ message: "Incorrect email or password" });
+      }
+
+      // If user is found, compare passwords
+      bcrypt.compare(password, user.password).then((isMatch) => {
+        if (!isMatch) {
+          // If passwords don't match, return error
+          return res
+            .status(401)
+            .json({ message: "Incorrect email or password" });
+        }
+
+        // If passwords match, create JWT token
+        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+          expiresIn: "7d",
+        });
+
+        // Send token in response
+        res.status(200).json({ token });
+      });
+    })
+    .catch((err) => {
+      // Handle other errors
+      console.error(err);
+      res.status(DEFAULT_ERROR).json({ message: "An error has occurred on the server." });
+    });
+};
+
+module.exports = { getUsers, createUser, getUserById, login };
