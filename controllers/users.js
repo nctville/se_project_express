@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const { JWT_SECRET } = require("../utils/config");
 
 const {
   BAD_REQUEST,
@@ -87,7 +88,7 @@ const getUserById = (req, res) => {
         .send({ message: "An error has occurred on the server." });
     });
 };
-
+/*
 const login = (req, res) => {
   const { email, password } = req.body;
 
@@ -123,5 +124,23 @@ const login = (req, res) => {
       res.status(DEFAULT_ERROR).json({ message: "An error has occurred on the server." });
     });
 };
+*/
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      // Creating a token
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+
+      // Sending the token in the response
+      res.send({ token });
+    })
+    .catch(() => {
+      res.status(UNAUATHORIZED).send({ message: 'Incorrect email or password' });
+    });
+};
 module.exports = { getUsers, createUser, getUserById, login };
