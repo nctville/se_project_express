@@ -8,12 +8,12 @@ router.get('/me', authenticateUser, getUserById);
 // PATCH /users/me route
 router.patch('/me', authenticateUser, getUserById);
 
-module.exports = router;
 
 
 
 // router.get("/", getUsers);
 // router.get("/:userId", getUserById);
 // router.post("/", createUser);
+
 
 module.exports = router;
