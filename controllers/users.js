@@ -130,6 +130,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
+    .select('+password') // Include the password hash in the query result
     .then((user) => {
       // Creating a token
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {

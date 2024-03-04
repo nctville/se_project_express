@@ -1,7 +1,12 @@
 // const router = require("express").Router();
 
 const ClothingItem = require("../models/clothingItem");
-const { BAD_REQUEST, NOT_FOUND, DEFAULT_ERROR } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  DEFAULT_ERROR,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const createItem = (req, res) => {
   console.log(req);
@@ -35,21 +40,38 @@ const getItems = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
+  const userId = req.user._id; // Get the ID of the logged-in user
+
+  ClothingItem.findById(itemId)
     .then((item) => {
-      res
-        .status(200)
-        .send({ message: "Item deleted successfully", deletedItem: item });
-    })
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
+      if (!item) {
         return res.status(NOT_FOUND).send({ message: "Item not found" });
       }
+
+      // Check if the logged-in user is the owner of the item
+      if (item.owner.toString() !== userId) {
+        return res
+          .status(FORBIDDEN)
+          .send({ message: "You are not authorized to delete this item" });
+      }
+
+      // If the user is authorized, delete the item
+      return ClothingItem.findByIdAndDelete(itemId);
+    })
+    .then((deletedItem) => {
+      if (!deletedItem) {
+        return res.status(NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res
+        .status(200)
+        .send({ message: "Item deleted successfully", deletedItem });
+    })
+    .catch((err) => {
+      console.error(err);
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).send({ message: "Invalid item ID" });
       }
-      return res.status(DEFAULT_ERROR).send({ message: "Delete Item failed" });
+      return res.status(DEFAULT_ERROR).send({ message: "Delete item failed" });
     });
 };
 
