@@ -7,9 +7,7 @@ const handleAuthError = (res) => {
     .send({ message: 'Authorization Error' });
 };
 
-const extractBearerToken = (header) => {
-  return header.replace('Bearer ', '');
-};
+const extractBearerToken = (header) => header.replace('Bearer ', '');
 
 const authenticateUser = (req, res, next) => {
   const { authorization } = req.headers;
@@ -29,7 +27,7 @@ const authenticateUser = (req, res, next) => {
 
   req.user = payload; // adding the payload to the Request object
 
-  next(); // passing the request further along
+  return next(); // explicitly return next() to satisfy ESLint
 };
 
 module.exports = authenticateUser;

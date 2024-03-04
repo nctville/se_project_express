@@ -1,5 +1,7 @@
-const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const User = require("../models/user");
+
 const { JWT_SECRET } = require("../utils/config");
 
 const {
@@ -38,19 +40,18 @@ const getUsers = (req, res) => {
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-
   // Hashing the password
   bcrypt
     .hash(password, 10)
-    .then((hash) => {
+    .then((hash) =>
       // Creating the user with hashed password
-      return User.create({
-        name: name,
-        avatar: avatar,
-        email: email,
+      User.create({
+        name,
+        avatar,
+        email,
         password: hash,
-      });
-    })
+      })
+    )
     .then((user) => {
       // Send the created user in the response
       res.status(200).send(user);
@@ -58,22 +59,19 @@ const createUser = (req, res) => {
     .catch((err) => {
       // Check if the error is a duplicate email error
       if (err.code === MONGODB_ERROR) {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: "Email already exists" });
+        return res.status(BAD_REQUEST).send({ message: "Email already exists" });
       }
       // Handle other errors
       console.error(err);
-      return res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
+      return res.status(DEFAULT_ERROR).send({ message: "An error has occurred on the server." });
     });
 };
+
 
 const getUserById = (req, res) => {
   const userId = req.user._id; // Retrieve the user ID from the authenticated request
 
-  //const { userId } = req.params;
+  // const { userId } = req.params;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
