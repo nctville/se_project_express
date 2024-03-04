@@ -71,7 +71,9 @@ const createUser = (req, res) => {
 };
 
 const getUserById = (req, res) => {
-  const { userId } = req.params;
+  const userId = req.user._id; // Retrieve the user ID from the authenticated request
+
+  //const { userId } = req.params;
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
