@@ -53,7 +53,7 @@ const createUser = (req, res) => {
       email,
       password: hash,
     }))
-    .then(() => res.status(200).send({ message: "User created successfully" })) // Send success message
+    .then(() => res.status(200).send({ name, avatar, email }))
     .catch((err) => {
       // Check if the error is a duplicate email error
       if (err.code === MONGODB_ERROR) {
@@ -96,7 +96,7 @@ const updateUserProfile = (req, res) => {
   const { name, avatar } = req.body;
 
   // Update the user's profile
-  User.findByIdAndUpdate(userId, { name, avatar })
+  User.findByIdAndUpdate(userId, { name, avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).send({ message: 'User not found' });
