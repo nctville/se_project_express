@@ -15,16 +15,11 @@ mongoose.connect(
   },
   (e) => console.log("DB error", e),
 );
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: "65e0c3d4add728a0be390fe2",
-//   };
-//   next();
-// });
 
 app.use(express.json());
-app.use(routes);
 app.use(cors());
+app.use(routes);
+
 
 console.log("!!!");
 

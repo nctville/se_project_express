@@ -10,7 +10,10 @@ const {
   DEFAULT_ERROR,
   MONGODB_ERROR,
   UNAUATHORIZED,
+  DUPLICATE_ERROR
 } = require("../utils/errors");
+
+/*
 
 const getUsers = (req, res) => {
   User.find({})
@@ -23,43 +26,46 @@ const getUsers = (req, res) => {
     });
 };
 
-// const createUser = (req, res) => {
-//   const { name, avatar } = req.body;
-//   User.create({ name, avatar })
-//     .then((user) => res.status(200).send(user))
-//     .catch((err) => {
-//       console.error(err);
-//       if (err.name === "ValidationError") {
-//         return res.status(BAD_REQUEST).send({ message: "Invalid data." });
-//       }
-//       return res
-//         .status(DEFAULT_ERROR)
-//         .send({ message: "An error has occurred on the server." });
-//     });
-// };
+const createUser = (req, res) => {
+  const { name, avatar } = req.body;
+  User.create({ name, avatar })
+    .then((user) => res.status(200).send(user))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data." });
+      }
+      return res
+        .status(DEFAULT_ERROR)
+        .send({ message: "An error has occurred on the server." });
+    });
+};
+*/
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
+
   // Hashing the password
-  bcrypt
-    .hash(password, 10)
-    .then((hash) =>
-      // Creating the user with hashed password
-      User.create({
-        name,
-        avatar,
-        email,
-        password: hash,
-      })
-    )
-    .then((user) => {
-      // Send the created user in the response
-      res.status(200).send(user);
+  bcrypt.hash(password, 10)
+  .then((hash) =>
+    User.create({
+      name,
+      avatar,
+      email,
+      password: hash,
     })
+  )
+  .then((user) =>
+    res.status(200).send(user)
+  )
     .catch((err) => {
       // Check if the error is a duplicate email error
       if (err.code === MONGODB_ERROR) {
-        return res.status(BAD_REQUEST).send({ message: "Email already exists" });
+        return res.status(DUPLICATE_ERROR).send({ message: "Email already exists" });
+      }
+      // Handle validation errors
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: "Invalid data." });
       }
       // Handle other errors
       console.error(err);
@@ -88,6 +94,7 @@ const getUserById = (req, res) => {
         .send({ message: "An error has occurred on the server." });
     });
 };
+
 /*
 const login = (req, res) => {
   const { email, password } = req.body;
@@ -130,7 +137,6 @@ const login = (req, res) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
-    .select('+password') // Include the password hash in the query result
     .then((user) => {
       // Creating a token
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -140,8 +146,12 @@ const login = (req, res) => {
       // Sending the token in the response
       res.send({ token });
     })
-    .catch(() => {
-      res.status(UNAUATHORIZED).send({ message: 'Incorrect email or password' });
+    .catch((err) => {
+      if (err.message === 'Incorrect email or password') {
+        res.status(UNAUATHORIZED).send({ message: 'Incorrect email or password' });
+      } else {
+        res.status(DEFAULT_ERROR).send({ message: "An error has occurred on the server." });
+      }
     });
 };
-module.exports = { getUsers, createUser, getUserById, login };
+module.exports = { createUser, getUserById, login };
