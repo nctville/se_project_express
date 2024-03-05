@@ -47,17 +47,13 @@ const createUser = (req, res) => {
 
   // Hashing the password
   bcrypt.hash(password, 10)
-  .then((hash) =>
-    User.create({
+    .then((hash) => User.create({
       name,
       avatar,
       email,
       password: hash,
-    })
-  )
-  .then((user) =>
-    res.status(200).send(user)
-  )
+    }))
+    .then(() => res.status(200).send({ message: "User created successfully" })) // Send success message
     .catch((err) => {
       // Check if the error is a duplicate email error
       if (err.code === MONGODB_ERROR) {
@@ -65,7 +61,7 @@ const createUser = (req, res) => {
       }
       // Handle validation errors
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: "Invalid data." });
+        return res.status(BAD_REQUEST).send({ message: "Invalid data." });
       }
       // Handle other errors
       console.error(err);
@@ -92,6 +88,27 @@ const getUserById = (req, res) => {
       return res
         .status(DEFAULT_ERROR)
         .send({ message: "An error has occurred on the server." });
+    });
+};
+
+const updateUserProfile = (req, res) => {
+  const userId = req.user._id; // Get the ID of the logged-in user
+  const { name, avatar } = req.body;
+
+  // Update the user's profile
+  User.findByIdAndUpdate(userId, { name, avatar })
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).send({ message: 'User not found' });
+      }
+      return res.status(200).send(user); // Send the updated user profile in the response
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).send({ message: "Invalid data." });
+      }
+      console.error(err);
+      return res.status(DEFAULT_ERROR).send({ message: 'An error occurred while updating user profile' });
     });
 };
 
@@ -154,4 +171,5 @@ const login = (req, res) => {
       }
     });
 };
-module.exports = { createUser, getUserById, login };
+
+module.exports = { createUser, getUserById, login, updateUserProfile };
