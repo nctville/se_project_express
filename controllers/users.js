@@ -13,34 +13,6 @@ const {
   DUPLICATE_ERROR
 } = require("../utils/errors");
 
-/*
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    });
-};
-
-const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  User.create({ name, avatar })
-    .then((user) => res.status(200).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).send({ message: "Invalid data." });
-      }
-      return res
-        .status(DEFAULT_ERROR)
-        .send({ message: "An error has occurred on the server." });
-    });
-};
-*/
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -112,43 +84,6 @@ const updateUserProfile = (req, res) => {
     });
 };
 
-/*
-const login = (req, res) => {
-  const { email, password } = req.body;
-
-  // Find the user by email
-  User.findOne({ email })
-    .then((user) => {
-      if (!user) {
-        // If user is not found, return error
-        return res.status(401).json({ message: "Incorrect email or password" });
-      }
-
-      // If user is found, compare passwords
-      bcrypt.compare(password, user.password).then((isMatch) => {
-        if (!isMatch) {
-          // If passwords don't match, return error
-          return res
-            .status(401)
-            .json({ message: "Incorrect email or password" });
-        }
-
-        // If passwords match, create JWT token
-        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-          expiresIn: "7d",
-        });
-
-        // Send token in response
-        res.status(200).json({ token });
-      });
-    })
-    .catch((err) => {
-      // Handle other errors
-      console.error(err);
-      res.status(DEFAULT_ERROR).json({ message: "An error has occurred on the server." });
-    });
-};
-*/
 
 const login = (req, res) => {
   const { email, password } = req.body;
